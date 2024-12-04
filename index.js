@@ -17,7 +17,9 @@ app.get("/", (req, res) => {
   res.send("Server running Fine!");
 });
 
-const uri = `mongodb+srv://${process.env.USER_ID}:${process.env.PASSWORD}@cluster0.hjkzu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+// const uri = `mongodb+srv://${process.env.USER_ID}:${process.env.PASSWORD}@cluster0.hjkzu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+
+const uri = "mongodb://localhost:27017";
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -29,77 +31,75 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    const equipments = client.db("Edge_Sporty").collection("equipments");
+    const products = client.db("Edge_Sporty").collection("products");
     //Create Data
-    app.post("/equipments", async (req, res) => {
-      const result = await equipments.insertOne(req.body);
+    app.post("/products", async (req, res) => {
+      const result = await products.insertOne(req.body);
       res.send(result);
     });
 
     //Get Data
-    app.get("/equipments", async (req, res) => {
-      const result = await equipments.find().toArray();
+    app.get("/products", async (req, res) => {
+      const result = await products.find().toArray();
       res.send(result);
     });
 
     //Get Single Data by _id
-    app.get("/equipments/:id", async (req, res) => {
+    app.get("/products/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      const result = await equipments.findOne(query);
+      const result = await products.findOne(query);
       res.send(result);
     });
 
     //Get Single Data by Email
-    app.get("/equipments/:email", async (req, res) => {
+    app.get("/products/:email", async (req, res) => {
       const email = req.params.email;
       const filter = { email:email };
-      const result = await equipments.findOne(filter);
+      const result = await products.findOne(filter);
       res.send(result);
     });
 
     //Update Data by _id
-    app.put("/equipments/:id", async (req, res) => {
+    app.put("/products/:id", async (req, res) => {
       const id = req.params.id;
       const {
-        image,
-        equipmentsName,
+        equipmentName,
         categoryName,
         description,
-        price,
-        rating,
         customization,
         processingTime,
         stockStatus,
-        userEmail,
-        userName,
+        price,
+        rating,
+        image,
       } = req.body;
       const query = { _id: new ObjectId(id) };
       const options = { upsert: true };
       const setEquipment = {
         $set: {
-          image:image,
-          equipmentsName:equipmentsName,
+          userName:userName,
+          userEmail:userEmail,
+          equipmentName:equipmentName,
           categoryName:categoryName,
           description:description,
-          price:price,
-          rating:rating,
           customization:customization,
           processingTime:processingTime,
           stockStatus:stockStatus,
-          userEmail:userEmail,
-          userName:userName
+          price:price,
+          rating:rating,
+          image:image
         },
       };
-      const result = await equipments.updateOne(query, setEquipment, options);
+      const result = await products.updateOne(query, setEquipment, options);
       res.send(result);
     });
 
     //Delete Data
-    app.delete("/equipments/:id", async (req, res) => {
+    app.delete("/products/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      const result = await equipments.deleteOne(query);
+      const result = await products.deleteOne(query);
       res.send(result);
     });
   } finally {
