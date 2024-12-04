@@ -36,7 +36,13 @@ async function run() {
       res.send(result);
     });
 
-   
+    //Get Data
+    app.get("/equipments", async (req, res) => {
+      const result = await equipments.find().toArray();
+      res.send(result);
+    });
+
+    
   } finally {
   }
 }
