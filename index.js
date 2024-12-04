@@ -42,6 +42,22 @@ async function run() {
       res.send(result);
     });
 
+    //Get Single Data by _id
+    app.get("/equipments/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await equipments.findOne(query);
+      res.send(result);
+    });
+
+    //Get Single Data by Email
+    app.get("/equipments/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { email:email };
+      const result = await equipments.findOne(filter);
+      res.send(result);
+    });
+
     
   } finally {
   }
