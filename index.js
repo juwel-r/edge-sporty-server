@@ -29,7 +29,14 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    
+    const equipments = client.db("Edge_Sporty").collection("equipments");
+    //Create Data
+    app.post("/equipments", async (req, res) => {
+      const result = await equipments.insertOne(req.body);
+      res.send(result);
+    });
+
+   
   } finally {
   }
 }
