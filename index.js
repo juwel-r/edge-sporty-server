@@ -95,7 +95,13 @@ async function run() {
       res.send(result);
     });
 
-
+    //Delete Data
+    app.delete("/equipments/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await equipments.deleteOne(query);
+      res.send(result);
+    });
   } finally {
   }
 }
