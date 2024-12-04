@@ -58,7 +58,44 @@ async function run() {
       res.send(result);
     });
 
-    
+    //Update Data by _id
+    app.put("/equipments/:id", async (req, res) => {
+      const id = req.params.id;
+      const {
+        image,
+        equipmentsName,
+        categoryName,
+        description,
+        price,
+        rating,
+        customization,
+        processingTime,
+        stockStatus,
+        userEmail,
+        userName,
+      } = req.body;
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const setEquipment = {
+        $set: {
+          image:image,
+          equipmentsName:equipmentsName,
+          categoryName:categoryName,
+          description:description,
+          price:price,
+          rating:rating,
+          customization:customization,
+          processingTime:processingTime,
+          stockStatus:stockStatus,
+          userEmail:userEmail,
+          userName:userName
+        },
+      };
+      const result = await equipments.updateOne(query, setEquipment, options);
+      res.send(result);
+    });
+
+
   } finally {
   }
 }
