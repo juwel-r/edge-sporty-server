@@ -1,12 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const {
-  MongoClient,
-  ServerApiVersion,
-  Collection,
-  ObjectId,
-} = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -14,12 +9,12 @@ app.use(express.json());
 app.use(cors());
 
 app.get("/", (req, res) => {
-  res.send("Server running Fine!");
+  res.send("Server is running Fine!");
 });
 
-// const uri = `mongodb+srv://${process.env.USER_ID}:${process.env.PASSWORD}@cluster0.hjkzu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+const uri = `mongodb+srv://${process.env.USER_ID}:${process.env.PASSWORD}@cluster0.hjkzu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
-const uri = "mongodb://localhost:27017";
+// const uri = "mongodb://localhost:27017";
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -32,6 +27,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const products = client.db("Edge_Sporty").collection("products");
+
     //Create Data
     app.post("/products", async (req, res) => {
       const result = await products.insertOne(req.body);
@@ -55,8 +51,8 @@ async function run() {
     //Get Single Data by Email
     app.get("/products/:email", async (req, res) => {
       const email = req.params.email;
-      const filter = { email:email };
-      const result = await products.findOne(filter);
+      const filter = { email: email };
+      const result = await products.find(filter).toArray();
       res.send(result);
     });
 
@@ -64,7 +60,7 @@ async function run() {
     app.put("/products/:id", async (req, res) => {
       const id = req.params.id;
       const {
-        equipmentName,
+        productsName,
         categoryName,
         description,
         customization,
@@ -78,17 +74,15 @@ async function run() {
       const options = { upsert: true };
       const setEquipment = {
         $set: {
-          userName:userName,
-          userEmail:userEmail,
-          equipmentName:equipmentName,
-          categoryName:categoryName,
-          description:description,
-          customization:customization,
-          processingTime:processingTime,
-          stockStatus:stockStatus,
-          price:price,
-          rating:rating,
-          image:image
+          productsName: productsName,
+          categoryName: categoryName,
+          description: description,
+          customization: customization,
+          processingTime: processingTime,
+          stockStatus: stockStatus,
+          price: price,
+          rating: rating,
+          image: image,
         },
       };
       const result = await products.updateOne(query, setEquipment, options);
