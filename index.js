@@ -40,6 +40,14 @@ async function run() {
       res.send(result);
     });
 
+    //Get specific data ==> Dynamic number
+    app.get("/products/limit/:limit", async (req, res) => {
+      const limitNumber = parseInt(req.params.limit)
+      const result = await products.find().limit(limitNumber).toArray();
+      res.send(result);
+    });
+
+
     //Get Single Data by _id
     app.get("/products/:id", async (req, res) => {
       const id = req.params.id;
@@ -48,10 +56,10 @@ async function run() {
       res.send(result);
     });
 
-    //Get Single Data by Email
-    app.get("/products/:email", async (req, res) => {
+    //Get Specific User's Data by Email
+    app.get("/products/email/:email", async (req, res) => {
       const email = req.params.email;
-      const filter = { email: email };
+      const filter = { userEmail: email };
       const result = await products.find(filter).toArray();
       res.send(result);
     });
