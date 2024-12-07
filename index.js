@@ -42,12 +42,23 @@ async function run() {
 
     //Get specific data ==> Dynamic number
     app.get("/products/limit/:limit", async (req, res) => {
-      const limitNumber = parseInt(req.params.limit)
+      const limitNumber = parseInt(req.params.limit);
       const result = await products.find().limit(limitNumber).toArray();
       res.send(result);
     });
-
-
+    
+    //Get data by Sort (A-Z)
+    app.get("/products/sort-az", async (req, res) => {
+      const result = await products.find().sort({price:1}).toArray();
+      res.send(result);
+    });
+    
+    //Get data by Sort (A-Z)
+    app.get("/products/sort-za", async (req, res) => {
+      const result = await products.find().sort({price:-1}).toArray();
+      res.send(result);
+    });
+ 
     //Get Single Data by _id
     app.get("/products/:id", async (req, res) => {
       const id = req.params.id;
@@ -104,6 +115,7 @@ async function run() {
       const result = await products.deleteOne(query);
       res.send(result);
     });
+    
   } finally {
   }
 }
