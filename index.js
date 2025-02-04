@@ -12,9 +12,9 @@ app.get("/", (req, res) => {
   res.send("Server is running Fine!");
 });
 
-const uri = `mongodb+srv://${process.env.USER_ID}:${process.env.PASSWORD}@cluster0.hjkzu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+// const uri = `mongodb+srv://${process.env.USER_ID}:${process.env.PASSWORD}@cluster0.hjkzu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
-// const uri = "mongodb://localhost:27017";
+const uri = "mongodb://localhost:27017";
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -27,6 +27,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const products = client.db("Edge_Sporty").collection("products");
+    const test = client.db("Edge_Sporty").collection("test");
 
     //Create Data
     app.post("/products", async (req, res) => {
@@ -46,19 +47,19 @@ async function run() {
       const result = await products.find().limit(limitNumber).toArray();
       res.send(result);
     });
-    
+
     //Get data by Sort (A-Z)
     app.get("/products/sort-az", async (req, res) => {
-      const result = await products.find().sort({price:1}).toArray();
+      const result = await products.find().sort({ price: 1 }).toArray();
       res.send(result);
     });
-    
+
     //Get data by Sort (A-Z)
     app.get("/products/sort-za", async (req, res) => {
-      const result = await products.find().sort({price:-1}).toArray();
+      const result = await products.find().sort({ price: -1 }).toArray();
       res.send(result);
     });
- 
+
     //Get Single Data by _id
     app.get("/products/:id", async (req, res) => {
       const id = req.params.id;
@@ -115,7 +116,27 @@ async function run() {
       const result = await products.deleteOne(query);
       res.send(result);
     });
-    
+
+    //test
+    app.post("/test", async (req, res) => {
+      const result = await test.insertOne(req.body);
+      res.send(result);
+    });
+
+    app.get("/test", async (req, res) => {
+      const result = await test.find().toArray();
+      res.send(result);
+    });
+
+    app.patch("/test/:id", async (req, res) => {
+      const filter = { _id: new ObjectId(req.params.id) };
+      const { number } = req.body;
+      const updateDoc = {
+        $inc: { money: number },
+      };
+      const result = await test.updateOne(filter, updateDoc);
+      res.send(result)
+    });
   } finally {
   }
 }
