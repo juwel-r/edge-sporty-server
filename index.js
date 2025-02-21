@@ -56,9 +56,26 @@ async function run() {
       if (category) {
         filter.category = category;
       }
-      console.log(category, filter);
-      const result = await taskCollection.find(filter).toArray();
+      const result = await taskCollection.find(filter).sort({index:1}).toArray();
       res.send(result);
+    });
+
+    // upate on drag
+    app.patch("/task", async (req, res) => {
+      const { task } = req.body;
+
+      const bulkOperations = task.map((taskItem, index) => {
+        return {
+          updateOne: {
+            filter: { _id: new ObjectId(taskItem._id) },
+            update: { $set: { index: index } },
+          },
+        };
+      });
+
+      const result = await taskCollection.bulkWrite(bulkOperations); // Perform bulk update
+      res.status(200).json(result);
+      console.log("done");
     });
   } finally {
   }
