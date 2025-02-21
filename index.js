@@ -12,9 +12,7 @@ app.get("/", (req, res) => {
   res.send("Server is running Fine!");
 });
 
-// const uri = `mongodb+srv://${process.env.USER_ID}:${process.env.PASSWORD}@cluster0.hjkzu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
-
-const uri = "mongodb://localhost:27017";
+const uri = `mongodb+srv://${process.env.USER_ID}:${process.env.PASSWORD}@cluster0.hjkzu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -26,116 +24,41 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    const products = client.db("Edge_Sporty").collection("products");
-    const test = client.db("Edge_Sporty").collection("test");
+    const taskFlow = client.db("task-flow");
+    const userCollection = taskFlow.collection("userCollection");
+    const taskCollection = taskFlow.collection("taskCollection");
 
-    //Create Data
-    app.post("/products", async (req, res) => {
-      const result = await products.insertOne(req.body);
+    app.get("/users", async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+      console.log(result);
+    });
+
+    app.post("/users", async (req, res) => {
+      const userId =
+        "TF" +
+        ((await userCollection.countDocuments()) + 1)
+          .toString()
+          .padStart(4, "0");
+      console.log(userId);
+      const userData = req.body;
+      userData.UID = userId;
+      const isExist = await userCollection.findOne({ email: userData.email });
+      if (isExist || !userData.email) return res.send({ isExist: true });
+      const result = await userCollection.insertOne(userData);
       res.send(result);
     });
 
-    //Get Data
-    app.get("/products", async (req, res) => {
-      const result = await products.find().toArray();
+    // task
+    app.get("/task", async (req, res) => {
+      const { category } = req.query;
+      let filter = {};
+      if (category) {
+        filter.category = category;
+      }
+      console.log(category, filter);
+      const result = await taskCollection.find(filter).toArray();
       res.send(result);
-    });
-
-    //Get specific data ==> Dynamic number
-    app.get("/products/limit/:limit", async (req, res) => {
-      const limitNumber = parseInt(req.params.limit);
-      const result = await products.find().limit(limitNumber).toArray();
-      res.send(result);
-    });
-
-    //Get data by Sort (A-Z)
-    app.get("/products/sort-az", async (req, res) => {
-      const result = await products.find().sort({ price: 1 }).toArray();
-      res.send(result);
-    });
-
-    //Get data by Sort (A-Z)
-    app.get("/products/sort-za", async (req, res) => {
-      const result = await products.find().sort({ price: -1 }).toArray();
-      res.send(result);
-    });
-
-    //Get Single Data by _id
-    app.get("/products/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await products.findOne(query);
-      res.send(result);
-    });
-
-    //Get Specific User's Data by Email
-    app.get("/products/email/:email", async (req, res) => {
-      const email = req.params.email;
-      const filter = { userEmail: email };
-      const result = await products.find(filter).toArray();
-      res.send(result);
-    });
-
-    //Update Data by _id
-    app.put("/products/:id", async (req, res) => {
-      const id = req.params.id;
-      const {
-        productsName,
-        categoryName,
-        description,
-        customization,
-        processingTime,
-        stockStatus,
-        price,
-        rating,
-        image,
-      } = req.body;
-      const query = { _id: new ObjectId(id) };
-      const options = { upsert: true };
-      const setEquipment = {
-        $set: {
-          productsName: productsName,
-          categoryName: categoryName,
-          description: description,
-          customization: customization,
-          processingTime: processingTime,
-          stockStatus: stockStatus,
-          price: price,
-          rating: rating,
-          image: image,
-        },
-      };
-      const result = await products.updateOne(query, setEquipment, options);
-      res.send(result);
-    });
-
-    //Delete Data
-    app.delete("/products/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await products.deleteOne(query);
-      res.send(result);
-    });
-
-    //test
-    app.post("/test", async (req, res) => {
-      const result = await test.insertOne(req.body);
-      res.send(result);
-    });
-
-    app.get("/test", async (req, res) => {
-      const result = await test.find().toArray();
-      res.send(result);
-    });
-
-    app.patch("/test/:id", async (req, res) => {
-      const filter = { _id: new ObjectId(req.params.id) };
-      const { number } = req.body;
-      const updateDoc = {
-        $inc: { money: number },
-      };
-      const result = await test.updateOne(filter, updateDoc);
-      res.send(result)
     });
   } finally {
   }
